@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ad Impressions Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  </head>
+  <body>
+    <h2>Ad Impressions & Clicks Over Time</h2>
+    <canvas id="adChart" width="800" height="400"></canvas>
+    <script>
+      let chartInstance = null;
+
+      async function fetchData() {
+        const response = await fetch("/data");
+        return await response.json();
+      }
+
+      function buildDatasets(data) {
+        const datasets = [];
+        for (const ad of data.ads) {
+          datasets.push({
+            label: ad.name + " Impressions",
+            data: ad.impressions,
+            borderColor: "blue",
+            fill: false,
+            yAxisID: "y",
+            datalabels: {
+              align: "top",
+              anchor: "end",
+              color: "blue",
+              font: { weight: "bold" },
+            },
+          });
+          datasets.push({
+            label: ad.name + " Clicks",
+            data: ad.clicks,
+            borderColor: "red",
+            fill: false,
+            yAxisID: "y1",
+            datalabels: {
+              align: "top",
+              anchor: "end",
+              color: "red",
+              font: { weight: "bold" },
+            },
+          });
+        }
+        return datasets;
+      }
+
+      function plotChart(data) {
+        const ctx = document.getElementById("adChart").getContext("2d");
+        const labels = data.timestamps;
+        const datasets = buildDatasets(data);
+        const options = {
+          responsive: true,
+          plugins: {
+            datalabels: {
+              display: true,
+              formatter: function (value, context) {
+                return value;
+              },
+            },
+          },
+          scales: {
+            x: { title: { display: true, text: "Timestamp" } },
+            y: {
+              title: { display: true, text: "Impressions" },
+              position: "left",
+            },
+            y1: {
+              title: { display: true, text: "Clicks" },
+              position: "right",
+              grid: { drawOnChartArea: false },
+            },
+          },
+        };
+
+        if (chartInstance) {
+          chartInstance.data.labels = labels;
+          chartInstance.data.datasets = datasets;
+          chartInstance.options = options;
+          chartInstance.update();
+        } else {
+          chartInstance = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: labels,
+              datasets: datasets,
+            },
+            options: options,
+            plugins: [ChartDataLabels],
+          });
+        }
+      }
+
+      fetchData().then(plotChart);
+      setInterval(() => {
+        fetchData().then(plotChart);
+      }, 60000); // update every minute
+    </script>
+  </body>
+</html>
