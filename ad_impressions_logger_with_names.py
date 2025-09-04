@@ -5,8 +5,8 @@ import smtplib
 from email.mime.text import MIMEText
 import json
 
-API_URL = "https://api.adbutler.com/v2/reports?type=ad-item&period=day&preset=today&ad-items=523668188,523668181,523844050,523844055"
-AD_ITEMS_URL = "https://api.adbutler.com/v2/ad-items?limit=100&id=523668188,523668181,523844050,523844055"
+API_URL = "https://api.adbutler.com/v2/reports?type=ad-item&period=day&preset=today&ad-items=523844050,523844055,523668188,523668181,523843778,523843781,523821647,523821648"
+AD_ITEMS_URL = "https://api.adbutler.com/v2/ad-items?limit=100&id=523844050,523844055,523668188,523668181,523843778,523843781,523821647,523821648"
 AUTH_HEADER = {
     "Authorization": "Basic 552ad1d70aa376a7e83f42fbfbac9283"
 }
