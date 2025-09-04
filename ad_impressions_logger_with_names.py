@@ -19,6 +19,8 @@ SMTP_PASS = "zwyjaptqnoxrrztn"
 EMAIL_FROM = "kevinanderson86@gmail.com"
 EMAIL_TO = "kevin.anderson@ses.com"
 
+DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1413208924680622171/ohs4Ieyk15MUCsdDBkrQApsyQqRWtjNoW9y9jI7HcmQWdhmNCBAkWbKav65kFlUt-zF8"
+
 
 def get_ad_names():
     try:
@@ -49,6 +51,16 @@ def send_email(subject, body, to_addr=EMAIL_TO):
             server.sendmail(EMAIL_FROM, to_addr, msg.as_string())
     except Exception as e:
         print(f"Error sending email: {e}")
+
+
+def send_discord_message(message):
+    try:
+        payload = {"content": message}
+        response = requests.post(DISCORD_WEBHOOK_URL, json=payload)
+        if response.status_code != 204:
+            print(f"Discord webhook error: {response.status_code} {response.text}")
+    except Exception as e:
+        print(f"Error sending Discord message: {e}")
 
 
 def fetch_and_log(ad_names):
@@ -106,6 +118,7 @@ def main():
                 ad_stats[ad_id] = {"impressions": impressions, "clicks": clicks}
             print()
             message = "\n".join(sms_lines)
+            send_discord_message(message)
             minute_counter += 1
             if minute_counter % 5 == 0:
                 send_email("Ad Impressions Report", message)
