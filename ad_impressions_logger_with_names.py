@@ -5,8 +5,8 @@ import smtplib
 from email.mime.text import MIMEText
 import json
 
-API_URL = "https://api.adbutler.com/v2/reports?type=ad-item&period=day&preset=today&ad-items=523668188,523668181"
-AD_ITEMS_URL = "https://api.adbutler.com/v2/ad-items?limit=100&id=523668188,523668181"
+API_URL = "https://api.adbutler.com/v2/reports?type=ad-item&period=day&preset=today&ad-items=523668188,523668181,523844050,523844055"
+AD_ITEMS_URL = "https://api.adbutler.com/v2/ad-items?limit=100&id=523668188,523668181,523844050,523844055"
 AUTH_HEADER = {
     "Authorization": "Basic 552ad1d70aa376a7e83f42fbfbac9283"
 }
@@ -76,40 +76,6 @@ def fetch_and_log(ad_names):
         print(f"Error fetching data: {e}")
 
 
-def update_chart_data(timestamp, ad_names, ad_stats):
-    DATA_FILE = "ad_data.json"
-    try:
-        # Load existing data
-        try:
-            with open(DATA_FILE, "r") as f:
-                chart_data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            chart_data = {"timestamps": [], "ads": []}
-        # Update timestamps
-        chart_data["timestamps"].append(timestamp)
-        # Update ad stats
-        if not chart_data["ads"]:
-            for ad_id, stats in ad_stats.items():
-                chart_data["ads"].append({
-                    "id": ad_id,
-                    "name": ad_names.get(ad_id, f"AD ID: {ad_id}"),
-                    "impressions": [stats["impressions"]],
-                    "clicks": [stats["clicks"]]
-                })
-        else:
-            for ad in chart_data["ads"]:
-                ad_id = ad["id"]
-                stats = ad_stats.get(ad_id, {"impressions": 0, "clicks": 0})
-                ad["impressions"].append(stats["impressions"])
-                ad["clicks"].append(stats["clicks"])
-        # Save updated data
-        with open(DATA_FILE, "w") as f:
-            json.dump(chart_data, f)
-        print(f"[ad_data.json] Updated at {timestamp}. Total timestamps: {len(chart_data['timestamps'])}")
-    except Exception as e:
-        print(f"Error updating chart data: {e}")
-
-
 def main():
     ad_names = get_ad_names()
     prev_stats = {}
@@ -140,7 +106,6 @@ def main():
                 ad_stats[ad_id] = {"impressions": impressions, "clicks": clicks}
             print()
             message = "\n".join(sms_lines)
-            update_chart_data(timestamp, ad_names, ad_stats)
             minute_counter += 1
             if minute_counter % 5 == 0:
                 send_email("Ad Impressions Report", message)
